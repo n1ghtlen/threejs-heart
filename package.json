@@ -12,6 +12,7 @@
     "vite": "^6.1.0"
   },
   "dependencies": {
+    "gh-pages": "^6.3.0",
     "gsap": "^3.12.7",
     "three": "^0.173.0"
   }
