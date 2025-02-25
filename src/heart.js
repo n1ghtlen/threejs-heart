@@ -1,19 +1,13 @@
+import "./style.css";
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js";
 import { OrbitControls } from "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/jsm/controls/OrbitControls.js";
+import { GLTFLoader } from "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/jsm/loaders/GLTFLoader.js";
 import { gsap } from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js";
-
-// Ensure a canvas exists in the HTML
-let canvas = document.querySelector(".webgl");
-if (!canvas) {
-  canvas = document.createElement("canvas");
-  canvas.classList.add("webgl");
-  document.body.appendChild(canvas);
-}
 
 // Scene
 const scene = new THREE.Scene();
 
-// Heart Shape
+// Heart shape
 const heartShape = new THREE.Shape();
 heartShape.moveTo(25, -25);
 heartShape.bezierCurveTo(25, -25, 20, 0, 0, 0);
@@ -34,8 +28,6 @@ const extrudeSettings = {
 
 const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
 geometry.computeVertexNormals();
-
-// Center the geometry
 geometry.computeBoundingBox();
 const center = new THREE.Vector3();
 geometry.boundingBox.getCenter(center);
@@ -51,11 +43,20 @@ const material = new THREE.MeshPhysicalMaterial({
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
+// Load external GLTF model
+const loader = new GLTFLoader();
+loader.load(
+  "path/to/your/model.glb", // Replace with your actual model path
+  (gltf) => {
+    gltf.scene.position.set(0, 0, 0);
+    scene.add(gltf.scene);
+  },
+  (xhr) => console.log(`Model ${(xhr.loaded / xhr.total) * 100}% loaded`),
+  (error) => console.error("Error loading GLTF model:", error)
+);
+
 // Sizes
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
+const sizes = { width: window.innerWidth, height: window.innerHeight };
 
 // Lights
 const light = new THREE.PointLight(0xffffff, 2000, 200);
@@ -81,31 +82,21 @@ camera.position.set(0, 0, 100);
 scene.add(camera);
 
 // Renderer
+const canvas = document.createElement("canvas");
+document.body.appendChild(canvas);
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-document.body.appendChild(renderer.domElement);
+renderer.setPixelRatio(2);
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.dampingFactor = 0.05;
 controls.enablePan = false;
 controls.enableZoom = false;
 controls.autoRotate = false;
 
-// Resize Handler
-window.addEventListener("resize", () => {
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
-
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-});
-
-// Animation Loop
+// Animation loop
 const loop = () => {
   controls.update();
   renderer.render(scene, camera);
@@ -113,7 +104,7 @@ const loop = () => {
 };
 loop();
 
-// Mouse Animation for Color Change
+// Mouse interaction color change
 let mouseDown = false;
 window.addEventListener("mousedown", () => (mouseDown = true));
 window.addEventListener("mouseup", () => (mouseDown = false));
@@ -125,13 +116,11 @@ window.addEventListener("mousemove", (e) => {
       Math.round((e.pageY / sizes.height) * 255),
       150,
     ];
-
     const newColor = new THREE.Color(`rgb(${rgb.join(",")})`);
     gsap.to(mesh.material.color, {
       r: newColor.r,
       g: newColor.g,
       b: newColor.b,
-      duration: 0.3,
     });
   }
 });
