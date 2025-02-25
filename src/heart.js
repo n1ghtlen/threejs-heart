@@ -1,9 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
-import gsap from "gsap";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-
+import { OrbitControls } from "https://unpkg.com/three@0.128.0/examples/jsm/controls/OrbitControls.js";
 // scene
 const scene = new THREE.Scene();
 
@@ -87,19 +84,6 @@ controls.dampeningFactor = 0.05;
 controls.enablePan = false;
 controls.enableZoom = false;
 controls.autoRotate = false;
-
-// Load the 3D model
-const loader = new GLTFLoader();
-loader.load(
-  "models/heart.glb",
-  (gltf) => {
-    scene.add(gltf.scene);
-  },
-  undefined,
-  (error) => {
-    console.error("Error loading model:", error);
-  }
-);
 
 const loop = () => {
   controls.update();
