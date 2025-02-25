@@ -87,19 +87,6 @@ controls.enablePan = false;
 controls.enableZoom = false;
 controls.autoRotate = false;
 
-// Load the 3D model
-const loader = new GLTFLoader();
-loader.load(
-  "models/heart.glb",
-  (gltf) => {
-    scene.add(gltf.scene);
-  },
-  undefined,
-  (error) => {
-    console.error("Error loading model:", error);
-  }
-);
-
 const loop = () => {
   controls.update();
   renderer.render(scene, camera);
