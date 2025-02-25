@@ -1,14 +1,20 @@
-import "./style.css";
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js";
-import gsap from "gsap";
 import { OrbitControls } from "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/jsm/controls/OrbitControls.js";
+import { gsap } from "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js";
 
-// scene
+// Ensure a canvas exists in the HTML
+let canvas = document.querySelector(".webgl");
+if (!canvas) {
+  canvas = document.createElement("canvas");
+  canvas.classList.add("webgl");
+  document.body.appendChild(canvas);
+}
+
+// Scene
 const scene = new THREE.Scene();
 
-// sphere
+// Heart Shape
 const heartShape = new THREE.Shape();
-
 heartShape.moveTo(25, -25);
 heartShape.bezierCurveTo(25, -25, 20, 0, 0, 0);
 heartShape.bezierCurveTo(-30, 0, -30, -35, -30, -35);
@@ -29,6 +35,7 @@ const extrudeSettings = {
 const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
 geometry.computeVertexNormals();
 
+// Center the geometry
 geometry.computeBoundingBox();
 const center = new THREE.Vector3();
 geometry.boundingBox.getCenter(center);
@@ -36,33 +43,34 @@ geometry.translate(-center.x, -center.y, -center.z);
 
 const material = new THREE.MeshPhysicalMaterial({
   color: 0xffb6c1,
-  flatShading: false, // Prevents weird shading effects
-  metalness: 0.1, // Slight metallic effect
-  roughness: 0.8, // Softer light reflection
+  flatShading: false,
+  metalness: 0.1,
+  roughness: 0.8,
 });
-const mesh = new THREE.Mesh(geometry, material);
 
+const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
-// sizes
+// Sizes
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
-// lights
+
+// Lights
 const light = new THREE.PointLight(0xffffff, 2000, 200);
 light.position.set(0, 0, 50);
 scene.add(light);
 
 const backLight = new THREE.PointLight(0xffffff, 2000, 200);
-backLight.position.set(0, 0, -50); // Light from behind
+backLight.position.set(0, 0, -50);
 scene.add(backLight);
 
 const bevelLight = new THREE.DirectionalLight(0xffffff, 1);
 bevelLight.position.set(50, 50, 50);
 scene.add(bevelLight);
 
-// camera
+// Camera
 const camera = new THREE.PerspectiveCamera(
   105,
   sizes.width / sizes.height,
@@ -72,48 +80,58 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(0, 0, 100);
 scene.add(camera);
 
-// renderer
-const canvas = document.querySelector(".webgl");
+// Renderer
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(2);
-document.body.appendChild(renderer.domElement); // Ensure canvas is added
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+document.body.appendChild(renderer.domElement);
 
-// controls
-const controls = new OrbitControls(camera, canvas);
-controls.enableDampening = true;
-controls.dampeningFactor = 0.05;
+// Controls
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 controls.enablePan = false;
 controls.enableZoom = false;
 controls.autoRotate = false;
 
+// Resize Handler
+window.addEventListener("resize", () => {
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+// Animation Loop
 const loop = () => {
   controls.update();
   renderer.render(scene, camera);
-  window.requestAnimationFrame(loop);
+  requestAnimationFrame(loop);
 };
 loop();
 
-// mouse animation color
+// Mouse Animation for Color Change
 let mouseDown = false;
-let rgb = [];
 window.addEventListener("mousedown", () => (mouseDown = true));
 window.addEventListener("mouseup", () => (mouseDown = false));
 
 window.addEventListener("mousemove", (e) => {
   if (mouseDown) {
-    rgb = [
+    const rgb = [
       Math.round((e.pageX / sizes.width) * 255),
       Math.round((e.pageY / sizes.height) * 255),
       150,
     ];
 
-    // animate
-    let newColor = new THREE.Color(`rgb(${rgb.join(",")})`);
+    const newColor = new THREE.Color(`rgb(${rgb.join(",")})`);
     gsap.to(mesh.material.color, {
       r: newColor.r,
       g: newColor.g,
       b: newColor.b,
+      duration: 0.3,
     });
   }
 });
