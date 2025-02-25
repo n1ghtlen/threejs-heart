@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="src/style.css" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width" />
+
+    <!-- Import map for Three.js -->
     <script type="importmap">
       {
         "imports": {
@@ -13,7 +15,13 @@
         }
       }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Import GSAP as a module -->
+    <script
+      type="module"
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"
+    ></script>
+
     <title>Vite App</title>
   </head>
   <body>
@@ -22,6 +30,8 @@
       <a href="/">&lt;3</a>
     </nav>
     <h1 class="title">Drag to spin!</h1>
+
+    <!-- Import the main script as a module -->
     <script type="module" src="src/heart.js"></script>
   </body>
 </html>
